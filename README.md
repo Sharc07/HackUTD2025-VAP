@@ -1,70 +1,78 @@
-# Getting Started with Create React App
+# 🚗 Toyota Vision – Drive Your Future, Virtually
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## ✨ Inspiration
+Finding your perfect car is hard when you can’t truly experience it — especially on the roads you know best. Many users lack access to nearby dealerships or test drives. **Toyota Vision** bridges that gap with AI-driven personalization and an immersive virtual driving experience, embodying Toyota’s commitment to **innovation, accessibility, and customer experience**.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 💡 What It Does
+**Toyota Vision** is a prototype that combines **AI insights** with a **3D driving simulator**.  
+Our intelligent assistant, **Yota**, uses the user’s ZIP code to analyze local weather, population, and road conditions — then recommends Toyota models that best fit their environment.  
+Users can then **virtually drive** their selected car in realistic weather, lighting, and terrain conditions, making the shopping experience personal and engaging.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🏗️ How We Built It
+- Designed the complete user flow — from onboarding to simulation.
+- Built the frontend using **React 18**, **Tailwind CSS**, and **Lucide React** for a responsive and modern interface.
+- Integrated **Google Maps, Street View, and Geocoding APIs** to render real-world routes.
+- Used the **Gemini API** for AI-powered recommendations and smart debugging.
+- Developed a **Python backend** to process user data and serve personalized car suggestions in real time.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## ⚙️ Tools & Technologies
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### 🖥️ Frontend
+- React 18  
+- Tailwind CSS  
+- Lucide React (Icons)  
+- JavaScript (ES6+)  
+- JSX  
 
-### `npm run build`
+### 🧠 Backend & APIs
+- Python  
+- Gemini API (Integration & AI Recommendations)  
+- Google Maps JavaScript API  
+- Street View API  
+- Geocoding API  
+- Web Audio API  
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+---
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 🚧 Challenges
+Integrating **AI, 3D simulation, and mapping technologies** into a cohesive system was our biggest hurdle.  
+We focused on ensuring smooth communication between components, refining datasets for ZIP-based car recommendations, and optimizing Google Maps rendering for performance.  
+These challenges strengthened our technical foundation and shaped a scalable, future-ready solution.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## 🏆 Accomplishments
+We’re proud of creating **Yota**, our intelligent AI assistant that personalizes car and financing recommendations.  
+Bringing the concept to life through a working **3D driving simulator** — combining multiple systems into one cohesive experience — showcased our team’s creativity, technical depth, and commitment to accessibility and innovation.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 📚 What We Learned
+Building **Toyota Vision** taught us how to merge **AI, web development, and user-centered design** into a seamless experience.  
+We learned how to connect machine learning models with interactive frontends, ensure efficient data flow, and design for accessibility.  
+Most importantly, we discovered how technology can transform car shopping into a **personalized, intelligent, and engaging** journey.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## 🚀 What’s Next
+We plan to expand Toyota Vision into a **fully immersive VR experience**, allowing users to virtually step inside their chosen Toyota and drive through real roads with **motion and weather simulation**.  
+Future plans include:
+- VR compatibility with realistic controls  
+- Real-time weather and traffic data integration  
+- Hardware feedback for steering and pedals  
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🌍 Vision Statement
+> “Cars connect people. Toyota Vision makes that connection smarter, more personal, and accessible to everyone.”
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### 🧩 Team Toyota Vision
+Built with passion for innovation, accessibility, and the future of digital automotive experiences.
