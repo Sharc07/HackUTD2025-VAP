@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, MessageCircle, Home, Car, Settings, Bell, User, Send, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Menu, X, Home, Car, Settings, Bell, User, Send, ChevronRight, ChevronLeft, MessageCircle } from 'lucide-react';
 
 export default function ToyotaSalesWebsite() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -7,10 +7,13 @@ export default function ToyotaSalesWebsite() {
   const [currentPage, setCurrentPage] = useState('home');
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [selectedCar, setSelectedCar] = useState(null);
-  const [messages, setMessages] = useState([
+  const [zipCode, setZipCode] = useState('');
+  const [budget, setBudget] = useState('');
+  const [chatMessages, setChatMessages] = useState([
     { role: 'assistant', text: 'Hello! I\'m Yota! How can I help?' }
   ]);
-  const [inputValue, setInputValue] = useState('');
+  const [chatInputValue, setChatInputValue] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const cars = [
     { name: 'Camry', year: 2025, price: '$28,045', desc: 'Elegant Sedan', engine: '2.5L 4-Cylinder', hp: 203, accel: '8.2s', icon: '🚗' },
@@ -18,13 +21,53 @@ export default function ToyotaSalesWebsite() {
     { name: 'Supra', year: 2025, price: '$45,050', desc: 'Sports Car', engine: '3.0L Turbo', hp: 382, accel: '3.9s', icon: '🏎️' },
   ];
 
-  const handleSendMessage = () => {
-    if (inputValue.trim()) {
-      setMessages([...messages, { role: 'user', text: inputValue }]);
-      setInputValue('');
-      setTimeout(() => {
-        setMessages(prev => [...prev, { role: 'assistant', text: 'Thanks for your interest!' }]);
-      }, 500);
+  const handleFindCar = async () => {
+    if (!zipCode.trim() || !budget.trim()) {
+      setChatMessages(prev => [...prev, { role: 'assistant', text: 'Please enter both ZIP code and budget!' }]);
+      return;
+    }
+
+    const userMessage = `Find me a car in ZIP code ${zipCode} with a budget of ${budget}`;
+    setChatMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [...chatMessages, { role: 'user', text: userMessage }] })
+      });
+      const data = await response.json();
+      setChatMessages(prev => [...prev, { role: 'assistant', text: data.text }]);
+    } catch (error) {
+      setChatMessages(prev => [...prev, { role: 'assistant', text: 'Error connecting to AI service' }]);
+    } finally {
+      setLoading(false);
+      setZipCode('');
+      setBudget('');
+    }
+  };
+
+  const handleChatSend = async () => {
+    if (!chatInputValue.trim()) return;
+
+    const userMessage = chatInputValue;
+    setChatMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    setChatInputValue('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [...chatMessages, { role: 'user', text: userMessage }] })
+      });
+      const data = await response.json();
+      setChatMessages(prev => [...prev, { role: 'assistant', text: data.text }]);
+    } catch (error) {
+      setChatMessages(prev => [...prev, { role: 'assistant', text: 'Error connecting to AI service' }]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,6 +84,7 @@ export default function ToyotaSalesWebsite() {
 
   return (
     <div className="flex h-screen bg-gray-950 text-gray-100">
+      {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-black border-r-2 border-red-600 transition-all duration-300 flex flex-col`}>
         <div className="p-6 border-b-2 border-red-600 flex items-center justify-between">
           {sidebarOpen && <h1 className="text-2xl font-bold text-red-600">TOYOTA</h1>}
@@ -74,6 +118,7 @@ export default function ToyotaSalesWebsite() {
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="bg-black border-b-2 border-red-600 px-8 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-white">Sales Dashboard</h2>
@@ -89,57 +134,47 @@ export default function ToyotaSalesWebsite() {
 
         <div className="flex-1 overflow-auto">
           <div className="p-8">
+            {/* Carousel */}
             <div className="mb-8">
               <h3 className="text-2xl font-bold text-white mb-6">Featured Models</h3>
-              <div className="relative bg-black border-2 border-red-600 rounded-lg overflow-hidden">
-                <div className="relative h-96 flex items-center justify-center">
-                  <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-b from-gray-900 to-black">
-                    <div className="text-9xl mb-4">{cars[carouselIndex].icon}</div>
-                    <h2 className="text-4xl font-bold text-white">{cars[carouselIndex].year} {cars[carouselIndex].name}</h2>
-                    <p className="text-red-600 text-2xl font-bold mt-2">{cars[carouselIndex].price}</p>
-                    <p className="text-gray-400 mt-2">{cars[carouselIndex].desc}</p>
+              <div className="relative bg-black border-2 border-red-600 rounded-lg overflow-hidden h-96">
+                <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-b from-gray-900 to-black">
+                  <div className="text-9xl mb-4">{cars[carouselIndex].icon}</div>
+                  <h2 className="text-4xl font-bold text-white">{cars[carouselIndex].year} {cars[carouselIndex].name}</h2>
+                  <p className="text-red-600 text-2xl font-bold mt-2">{cars[carouselIndex].price}</p>
+                  <p className="text-gray-400 mt-2">{cars[carouselIndex].desc}</p>
 
-                    <button 
-                      onClick={() => { setSelectedCar(cars[carouselIndex].name); setCurrentPage('drive'); }}
-                      className="absolute bottom-6 left-6 bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded-lg transition-all"
-                    >
-                      🏎️ Drive Now
-                    </button>
+                  <button 
+                    onClick={() => { setSelectedCar(cars[carouselIndex].name); setCurrentPage('drive'); }}
+                    className="absolute bottom-6 left-6 bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded-lg transition-all"
+                  >
+                    🏎️ Drive Now
+                  </button>
 
-                    <button 
-                      onClick={() => setCurrentPage('finance')}
-                      className="absolute bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 rounded-lg transition-all"
-                    >
-                      💰 Finance
-                    </button>
-                  </div>
+                  <button 
+                    onClick={() => setCurrentPage('finance')}
+                    className="absolute bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 rounded-lg transition-all"
+                  >
+                    💰 Finance
+                  </button>
                 </div>
 
-                <button 
-                  onClick={prevCar}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all z-10"
-                >
+                <button onClick={prevCar} className="absolute left-4 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all z-10">
                   <ChevronLeft size={24} />
                 </button>
-                <button 
-                  onClick={nextCar}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all z-10"
-                >
+                <button onClick={nextCar} className="absolute right-4 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all z-10">
                   <ChevronRight size={24} />
                 </button>
 
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
                   {cars.map((_, i) => (
-                    <button 
-                      key={i}
-                      onClick={() => setCarouselIndex(i)}
-                      className={`w-3 h-3 rounded-full transition-all ${i === carouselIndex ? 'bg-red-600 w-8' : 'bg-gray-600'}`}
-                    />
+                    <button key={i} onClick={() => setCarouselIndex(i)} className={`w-3 h-3 rounded-full transition-all ${i === carouselIndex ? 'bg-red-600 w-8' : 'bg-gray-600'}`} />
                   ))}
                 </div>
               </div>
             </div>
 
+            {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {[
                 { label: 'Vehicles Available', value: '2,450', icon: '🚗' },
@@ -154,6 +189,7 @@ export default function ToyotaSalesWebsite() {
               ))}
             </div>
 
+            {/* Activity */}
             <div className="bg-black border-2 border-red-600 rounded-lg p-6">
               <h3 className="text-xl font-bold text-white mb-4">Recent Activity</h3>
               <div className="space-y-3">
@@ -174,6 +210,7 @@ export default function ToyotaSalesWebsite() {
         </div>
       </div>
 
+      {/* Yota Chatbot */}
       <div className={`fixed bottom-6 right-6 transition-all duration-300 ${chatOpen ? 'w-96' : 'w-16'} z-50`}>
         {!chatOpen ? (
           <div className="relative group">
@@ -185,7 +222,7 @@ export default function ToyotaSalesWebsite() {
             </div>
           </div>
         ) : (
-          <div className="bg-black border-2 border-red-600 rounded-xl shadow-2xl flex flex-col h-96 overflow-hidden">
+          <div className="bg-black border-2 border-red-600 rounded-xl shadow-2xl flex flex-col h-screen md:h-96 overflow-hidden">
             <div className="bg-red-600 px-4 py-3 flex items-center justify-between">
               <h4 className="font-bold text-white">Yota</h4>
               <button onClick={() => setChatOpen(false)} className="text-white hover:bg-red-700 p-1 rounded transition-all">
@@ -193,28 +230,30 @@ export default function ToyotaSalesWebsite() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-950">
-              <div>
-                <label className="block text-red-600 font-bold mb-2">ZIP Code</label>
-                <input
-                  type="text"
-                  placeholder="Enter your ZIP code..."
-                  className="w-full bg-gray-900 border border-red-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-500"
-                />
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-950">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-xs rounded-lg px-4 py-2 text-sm ${msg.role === 'user' ? 'bg-red-600 text-white' : 'bg-gray-800 text-gray-100'}`}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              {loading && <div className="flex justify-start"><div className="bg-gray-800 text-gray-100 px-4 py-2 rounded-lg text-sm">Yota is thinking...</div></div>}
+            </div>
+
+            <div className="border-t border-red-600 p-3 bg-black space-y-3">
+              <div className="space-y-2">
+                <input type="text" placeholder="ZIP code..." value={zipCode} onChange={(e) => setZipCode(e.target.value)} className="w-full bg-gray-900 border border-red-600 rounded-lg px-2 py-1 text-white text-sm focus:outline-none" />
+                <input type="text" placeholder="Budget..." value={budget} onChange={(e) => setBudget(e.target.value)} className="w-full bg-gray-900 border border-red-600 rounded-lg px-2 py-1 text-white text-sm focus:outline-none" />
+                <button onClick={handleFindCar} disabled={loading} className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white font-bold py-2 rounded-lg text-sm">Find My Car</button>
               </div>
 
-              <div>
-                <label className="block text-red-600 font-bold mb-2">Budget</label>
-                <input
-                  type="text"
-                  placeholder="e.g., $25,000 - $35,000"
-                  className="w-full bg-gray-900 border border-red-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-500"
-                />
+              <div className="flex gap-2">
+                <input type="text" value={chatInputValue} onChange={(e) => setChatInputValue(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleChatSend()} placeholder="Ask Yota..." disabled={loading} className="flex-1 bg-gray-900 border border-red-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none" />
+                <button onClick={handleChatSend} disabled={loading} className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white p-2 rounded-lg">
+                  <Send size={18} />
+                </button>
               </div>
-
-              <button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-all mt-6">
-                Find My Car
-              </button>
             </div>
           </div>
         )}
@@ -431,6 +470,19 @@ function DriveSimulation({ carName, onBack }) {
   const gainRef = useRef(null);
   const mapRef = useRef(null);
 
+  useEffect(() => {
+    if (showMap && mapLoaded && mapRef.current) {
+      mapRef.current.innerHTML = '';
+      const iframe = document.createElement('iframe');
+      iframe.width = '100%';
+      iframe.height = '100%';
+      iframe.style.border = '0';
+      iframe.loading = 'lazy';
+      iframe.src = `https://www.openstreetmap.org/export/embed.html?bbox=-118.5,33.5,-117.5,34.5&layer=mapnik`;
+      mapRef.current.appendChild(iframe);
+    }
+  }, [showMap, mapLoaded]);
+
   const carSpecs = {
     'Camry': { engine: '2.5L 4-Cylinder', hp: 203, accel: '8.2s', acceleration: 0.12, maxSpeed: 120 },
     'RAV4': { engine: '2.5L 4-Cylinder', hp: 203, accel: '8.5s', acceleration: 0.11, maxSpeed: 115 },
@@ -631,18 +683,15 @@ function DriveSimulation({ carName, onBack }) {
             </div>
             <div ref={mapRef} className="w-full h-64 bg-gray-800">
               {mapLoaded && (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-blue-400 to-green-300">
-                  <div className="text-center text-white">
-                    <p className="text-2xl font-bold">📍 {zipCode}</p>
-                    <p className="text-sm mt-2">Bird's Eye View</p>
-                    <p className="text-xs mt-4 px-4">Satellite map for ZIP code {zipCode}</p>
-                    <div className="mt-4 grid grid-cols-3 gap-2 px-4">
-                      <div className="bg-black/50 rounded p-2 text-xs">Roads</div>
-                      <div className="bg-black/50 rounded p-2 text-xs">Parks</div>
-                      <div className="bg-black/50 rounded p-2 text-xs">Area</div>
-                    </div>
-                  </div>
-                </div>
+                <iframe
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyCZ4-Q0bUw06Jxi2cnyir2irl-rw2sECL4&q=${zipCode}&zoom=16&maptype=satellite`}
+                  allowFullScreen={false}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                ></iframe>
               )}
               {!mapLoaded && (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
