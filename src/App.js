@@ -1,37 +1,46 @@
-import React, { useState } from 'react';
-import { Menu, X, Search, MessageCircle, Home, Car, Settings, Bell, User, Send, ChevronRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Menu, X, MessageCircle, Home, Car, Settings, Bell, User, Send, ChevronRight, ChevronLeft } from 'lucide-react';
 
 export default function ToyotaSalesWebsite() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState('home');
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [selectedCar, setSelectedCar] = useState(null);
   const [messages, setMessages] = useState([
-    { role: 'assistant', text: 'Hello! I\'m the Toyota Assistant. How can I help you find your perfect vehicle today?' }
+    { role: 'assistant', text: 'Hello! I\'m Yota! How can I help?' }
   ]);
   const [inputValue, setInputValue] = useState('');
+
+  const cars = [
+    { name: 'Camry', year: 2025, price: '$28,045', desc: 'Elegant Sedan', engine: '2.5L 4-Cylinder', hp: 203, accel: '8.2s', icon: '🚗' },
+    { name: 'RAV4', year: 2025, price: '$30,175', desc: 'Versatile SUV', engine: '2.5L 4-Cylinder', hp: 203, accel: '8.5s', icon: '🚙' },
+    { name: 'Supra', year: 2025, price: '$45,050', desc: 'Sports Car', engine: '3.0L Turbo', hp: 382, accel: '3.9s', icon: '🏎️' },
+  ];
 
   const handleSendMessage = () => {
     if (inputValue.trim()) {
       setMessages([...messages, { role: 'user', text: inputValue }]);
       setInputValue('');
       setTimeout(() => {
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          text: 'Thanks for your message! Our team will be happy to assist you shortly.' 
-        }]);
+        setMessages(prev => [...prev, { role: 'assistant', text: 'Thanks for your interest!' }]);
       }, 500);
     }
   };
 
-  const vehicles = [
-    { name: 'Camry', price: '$28,045', image: '🚗', desc: 'Elegant Sedan' },
-    { name: 'RAV4', price: '$30,175', image: '🚙', desc: 'Versatile SUV' },
-    { name: 'Corolla', price: '$23,550', image: '🚗', desc: 'Reliable Compact' },
-    { name: 'Highlander', price: '$39,520', image: '🚙', desc: 'Spacious SUV' },
-  ];
+  const nextCar = () => setCarouselIndex((prev) => (prev + 1) % cars.length);
+  const prevCar = () => setCarouselIndex((prev) => (prev - 1 + cars.length) % cars.length);
+
+  if (currentPage === 'finance') {
+    return <FinancePage onBack={() => setCurrentPage('home')} cars={cars} />;
+  }
+
+  if (currentPage === 'drive') {
+    return <DriveSimulation carName={selectedCar || 'Camry'} onBack={() => setCurrentPage('home')} />;
+  }
 
   return (
     <div className="flex h-screen bg-gray-950 text-gray-100">
-      {/* Sidebar */}
       <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-black border-r-2 border-red-600 transition-all duration-300 flex flex-col`}>
         <div className="p-6 border-b-2 border-red-600 flex items-center justify-between">
           {sidebarOpen && <h1 className="text-2xl font-bold text-red-600">TOYOTA</h1>}
@@ -65,16 +74,10 @@ export default function ToyotaSalesWebsite() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar */}
         <div className="bg-black border-b-2 border-red-600 px-8 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-white">Sales Dashboard</h2>
           <div className="flex items-center gap-4">
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-              <input type="text" placeholder="Search vehicles..." className="bg-gray-900 border border-red-600 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-red-500" />
-            </div>
             <button className="p-2 hover:bg-red-600 rounded-lg transition-all">
               <Bell size={20} />
             </button>
@@ -84,22 +87,64 @@ export default function ToyotaSalesWebsite() {
           </div>
         </div>
 
-        {/* Dashboard Content */}
         <div className="flex-1 overflow-auto">
           <div className="p-8">
-            {/* Hero Section */}
-            <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-8 mb-8 text-white">
-              <h1 className="text-4xl font-bold mb-2">Welcome to Toyota Sales</h1>
-              <p className="text-red-100 text-lg">Discover your perfect vehicle from our premium collection</p>
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-white mb-6">Featured Models</h3>
+              <div className="relative bg-black border-2 border-red-600 rounded-lg overflow-hidden">
+                <div className="relative h-96 flex items-center justify-center">
+                  <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-b from-gray-900 to-black">
+                    <div className="text-9xl mb-4">{cars[carouselIndex].icon}</div>
+                    <h2 className="text-4xl font-bold text-white">{cars[carouselIndex].year} {cars[carouselIndex].name}</h2>
+                    <p className="text-red-600 text-2xl font-bold mt-2">{cars[carouselIndex].price}</p>
+                    <p className="text-gray-400 mt-2">{cars[carouselIndex].desc}</p>
+
+                    <button 
+                      onClick={() => { setSelectedCar(cars[carouselIndex].name); setCurrentPage('drive'); }}
+                      className="absolute bottom-6 left-6 bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded-lg transition-all"
+                    >
+                      🏎️ Drive Now
+                    </button>
+
+                    <button 
+                      onClick={() => setCurrentPage('finance')}
+                      className="absolute bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-2 rounded-lg transition-all"
+                    >
+                      💰 Finance
+                    </button>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={prevCar}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all z-10"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button 
+                  onClick={nextCar}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all z-10"
+                >
+                  <ChevronRight size={24} />
+                </button>
+
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+                  {cars.map((_, i) => (
+                    <button 
+                      key={i}
+                      onClick={() => setCarouselIndex(i)}
+                      className={`w-3 h-3 rounded-full transition-all ${i === carouselIndex ? 'bg-red-600 w-8' : 'bg-gray-600'}`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {[
                 { label: 'Vehicles Available', value: '2,450', icon: '🚗' },
                 { label: 'Monthly Sales', value: '$1.2M', icon: '📊' },
                 { label: 'Customer Satisfaction', value: '98%', icon: '⭐' },
-                { label: 'Active Leads', value: '342', icon: '👥' },
               ].map((stat, i) => (
                 <div key={i} className="bg-black border-2 border-red-600 rounded-lg p-6 hover:shadow-lg hover:shadow-red-600/50 transition-all">
                   <div className="text-3xl mb-2">{stat.icon}</div>
@@ -109,36 +154,6 @@ export default function ToyotaSalesWebsite() {
               ))}
             </div>
 
-            {/* Featured Vehicles */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white">Featured Vehicles</h3>
-                <button className="text-red-600 hover:text-red-500 flex items-center gap-2">
-                  View All <ChevronRight size={20} />
-                </button>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {vehicles.map((vehicle, i) => (
-                  <div key={i} className="bg-black border-2 border-gray-700 rounded-lg overflow-hidden hover:border-red-600 transition-all group">
-                    <div className="bg-gray-900 h-40 flex items-center justify-center text-6xl group-hover:bg-red-600/20">
-                      {vehicle.image}
-                    </div>
-                    <div className="p-4">
-                      <h4 className="font-bold text-lg text-white mb-1">{vehicle.name}</h4>
-                      <p className="text-gray-400 text-sm mb-3">{vehicle.desc}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-red-600 font-bold">{vehicle.price}</span>
-                        <button className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-all">
-                          View
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Activity */}
             <div className="bg-black border-2 border-red-600 rounded-lg p-6">
               <h3 className="text-xl font-bold text-white mb-4">Recent Activity</h3>
               <div className="space-y-3">
@@ -159,56 +174,552 @@ export default function ToyotaSalesWebsite() {
         </div>
       </div>
 
-      {/* Chatbot */}
       <div className={`fixed bottom-6 right-6 transition-all duration-300 ${chatOpen ? 'w-96' : 'w-16'} z-50`}>
         {!chatOpen ? (
-          <button onClick={() => setChatOpen(true)} className="w-16 h-16 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-red-600/50 transition-all">
-            <MessageCircle size={28} />
-          </button>
+          <div className="relative group">
+            <button onClick={() => setChatOpen(true)} className="w-16 h-16 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white shadow-lg hover:shadow-red-600/50 transition-all text-4xl">
+              🤖
+            </button>
+            <div className="absolute right-20 top-1/2 -translate-y-1/2 bg-black border-2 border-red-600 text-red-600 text-sm font-bold px-4 py-2 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all pointer-events-none">
+              Talk to Yota for your perfect car match!
+            </div>
+          </div>
         ) : (
           <div className="bg-black border-2 border-red-600 rounded-xl shadow-2xl flex flex-col h-96 overflow-hidden">
-            {/* Chat Header */}
             <div className="bg-red-600 px-4 py-3 flex items-center justify-between">
-              <div>
-                <h4 className="font-bold text-white">Toyota Assistant</h4>
-                <p className="text-xs text-red-100">Online</p>
-              </div>
+              <h4 className="font-bold text-white">Yota</h4>
               <button onClick={() => setChatOpen(false)} className="text-white hover:bg-red-700 p-1 rounded transition-all">
                 <X size={20} />
               </button>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-950">
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-xs rounded-lg px-4 py-2 ${
-                    msg.role === 'user'
-                      ? 'bg-red-600 text-white'
-                      : 'bg-gray-800 text-gray-100'
-                  }`}>
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-950">
+              <div>
+                <label className="block text-red-600 font-bold mb-2">ZIP Code</label>
+                <input
+                  type="text"
+                  placeholder="Enter your ZIP code..."
+                  className="w-full bg-gray-900 border border-red-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-500"
+                />
+              </div>
 
-            {/* Input */}
-            <div className="border-t border-red-600 p-3 bg-black flex gap-2">
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Type message..."
-                className="flex-1 bg-gray-900 border border-red-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-500"
-              />
-              <button onClick={handleSendMessage} className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-all">
-                <Send size={18} />
+              <div>
+                <label className="block text-red-600 font-bold mb-2">Budget</label>
+                <input
+                  type="text"
+                  placeholder="e.g., $25,000 - $35,000"
+                  className="w-full bg-gray-900 border border-red-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-red-500"
+                />
+              </div>
+
+              <button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-all mt-6">
+                Find My Car
               </button>
             </div>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function FinancePage({ onBack, cars }) {
+  const [car1, setCar1] = useState('Camry');
+  const [car2, setCar2] = useState('RAV4');
+  const [downPaymentPercent, setDownPaymentPercent] = useState(20);
+
+  const carData = {
+    'Camry': {
+      price: 28045,
+      hp: 203,
+      accel: 8.2,
+      mpg: 33,
+      icon: '🚗',
+      pros: ['Excellent fuel economy', 'Spacious interior', 'Reliable brand', 'Comfortable seats'],
+      cons: ['Not as sporty', 'Smaller trunk', 'Base model less features'],
+    },
+    'RAV4': {
+      price: 30175,
+      hp: 203,
+      accel: 8.5,
+      mpg: 30,
+      icon: '🚙',
+      pros: ['Great for families', 'All-wheel drive', 'High resale value', 'Versatile storage'],
+      cons: ['Higher price', 'Slower acceleration', 'Moderate fuel economy'],
+    },
+    'Supra': {
+      price: 45050,
+      hp: 382,
+      accel: 3.9,
+      mpg: 24,
+      icon: '🏎️',
+      pros: ['Powerful engine', 'Sporty performance', 'Luxury interior', 'Eye-catching design'],
+      cons: ['Premium price', 'Poor fuel economy', 'Sports handling takes practice'],
+    },
+  };
+
+  const selectedCar1 = carData[car1];
+  const selectedCar2 = carData[car2];
+
+  const calculateMonthlyPayment = (price) => {
+    const downPayment = (price * downPaymentPercent) / 100;
+    const principal = price - downPayment;
+    const monthlyRate = 0.065 / 12;
+    const monthlyPayment = (principal * (monthlyRate * Math.pow(1 + monthlyRate, 60))) / (Math.pow(1 + monthlyRate, 60) - 1);
+    return monthlyPayment.toFixed(2);
+  };
+
+  const compareField = (value1, value2, higherIsBetter = true) => {
+    if (value1 === value2) return 'tie';
+    if (higherIsBetter) return value1 > value2 ? 'car1' : 'car2';
+    return value1 < value2 ? 'car1' : 'car2';
+  };
+
+  const getWinnerClass = (winner, isFirstCar) => {
+    if (winner === 'tie') return 'border-gray-600';
+    return (winner === 'car1' && isFirstCar) || (winner === 'car2' && !isFirstCar)
+      ? 'border-green-600 bg-green-600/10'
+      : 'border-gray-600';
+  };
+
+  return (
+    <div className="w-full h-screen bg-gray-950 text-gray-100 flex flex-col overflow-hidden">
+      <div className="bg-black border-b-2 border-red-600 px-8 py-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">💰 Finance & Compare</h1>
+          <p className="text-gray-400 mt-1">Side-by-side vehicle comparison</p>
+        </div>
+        <button onClick={onBack} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-all">
+          ← Back
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-auto">
+        <div className="p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div className="bg-black border-2 border-red-600 rounded-lg p-6">
+              <label className="block text-red-600 font-bold mb-3">Vehicle 1</label>
+              <select
+                value={car1}
+                onChange={(e) => setCar1(e.target.value)}
+                className="w-full bg-gray-900 border border-red-600 text-white rounded-lg px-4 py-2 focus:outline-none"
+              >
+                {cars.map((car) => (
+                  <option key={car.name} value={car.name}>
+                    {car.year} {car.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="bg-black border-2 border-red-600 rounded-lg p-6">
+              <label className="block text-red-600 font-bold mb-3">Vehicle 2</label>
+              <select
+                value={car2}
+                onChange={(e) => setCar2(e.target.value)}
+                className="w-full bg-gray-900 border border-red-600 text-white rounded-lg px-4 py-2 focus:outline-none"
+              >
+                {cars.map((car) => (
+                  <option key={car.name} value={car.name}>
+                    {car.year} {car.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="bg-black border-2 border-red-600 rounded-lg p-6 mb-8">
+            <label className="text-red-600 font-bold mb-3 block">Down Payment: {downPaymentPercent}%</label>
+            <input
+              type="range"
+              min="5"
+              max="50"
+              value={downPaymentPercent}
+              onChange={(e) => setDownPaymentPercent(parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <ComparisonCard car={car1} data={selectedCar1} other={selectedCar2} compareField={compareField} getWinnerClass={getWinnerClass} downPaymentPercent={downPaymentPercent} calculateMonthlyPayment={calculateMonthlyPayment} isFirst={true} />
+            <ComparisonCard car={car2} data={selectedCar2} other={selectedCar1} compareField={compareField} getWinnerClass={getWinnerClass} downPaymentPercent={downPaymentPercent} calculateMonthlyPayment={calculateMonthlyPayment} isFirst={false} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ComparisonCard({ car, data, other, compareField, getWinnerClass, downPaymentPercent, calculateMonthlyPayment, isFirst }) {
+  return (
+    <div className="bg-black border-2 border-red-600 rounded-lg overflow-hidden">
+      <div className="bg-red-600 px-6 py-4">
+        <h2 className="text-2xl font-bold text-white">{data.icon} {car}</h2>
+      </div>
+
+      <div className="p-6 space-y-4">
+        <div className={`border-2 rounded-lg p-4 ${getWinnerClass(compareField(data.price, other.price, false), isFirst)}`}>
+          <div className="text-gray-400 text-sm">MSRP Price</div>
+          <div className="text-2xl font-bold text-red-600">${data.price.toLocaleString()}</div>
+        </div>
+
+        <div className={`border-2 rounded-lg p-4 ${getWinnerClass(compareField(data.hp, other.hp), isFirst)}`}>
+          <div className="text-gray-400 text-sm">Horsepower</div>
+          <div className="text-2xl font-bold text-white">{data.hp} HP</div>
+        </div>
+
+        <div className={`border-2 rounded-lg p-4 ${getWinnerClass(compareField(data.accel, other.accel, false), isFirst)}`}>
+          <div className="text-gray-400 text-sm">0-60 Time</div>
+          <div className="text-2xl font-bold text-white">{data.accel}s</div>
+        </div>
+
+        <div className={`border-2 rounded-lg p-4 ${getWinnerClass(compareField(data.mpg, other.mpg), isFirst)}`}>
+          <div className="text-gray-400 text-sm">Fuel Economy</div>
+          <div className="text-2xl font-bold text-white">{data.mpg} MPG</div>
+        </div>
+
+        <div className="border-2 border-blue-600 bg-blue-600/10 rounded-lg p-4">
+          <div className="text-gray-400 text-sm">Down Payment</div>
+          <div className="text-2xl font-bold text-blue-400">${Math.round((data.price * downPaymentPercent) / 100).toLocaleString()}</div>
+        </div>
+
+        <div className="border-2 border-green-600 bg-green-600/10 rounded-lg p-4">
+          <div className="text-gray-400 text-sm">Monthly Payment (60 months @ 6.5%)</div>
+          <div className="text-3xl font-bold text-green-400">${calculateMonthlyPayment(data.price)}</div>
+        </div>
+
+        <div className="border-2 border-green-600 rounded-lg p-4">
+          <div className="text-green-600 font-bold mb-2">✅ PROS</div>
+          <ul className="text-sm text-gray-300 space-y-1">
+            {data.pros.map((pro, i) => (
+              <li key={i}>• {pro}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="border-2 border-red-600 rounded-lg p-4">
+          <div className="text-red-600 font-bold mb-2">❌ CONS</div>
+          <ul className="text-sm text-gray-300 space-y-1">
+            {data.cons.map((con, i) => (
+              <li key={i}>• {con}</li>
+            ))}
+          </ul>
+        </div>
+
+        <button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition-all">
+          Get Pre-Approved
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DriveSimulation({ carName, onBack }) {
+  const [speed, setSpeed] = useState(0);
+  const [throttle, setThrottle] = useState(0);
+  const [brake, setBrake] = useState(0);
+  const [distance, setDistance] = useState(0);
+  const [season, setSeason] = useState('summer');
+  const [isNight, setIsNight] = useState(false);
+  const [roadOffset, setRoadOffset] = useState(0);
+  const [zipCode, setZipCode] = useState('75080');
+  const [showMap, setShowMap] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const keysPressed = useRef({});
+  const audioContextRef = useRef(null);
+  const oscillatorRef = useRef(null);
+  const gainRef = useRef(null);
+  const mapRef = useRef(null);
+
+  const carSpecs = {
+    'Camry': { engine: '2.5L 4-Cylinder', hp: 203, accel: '8.2s', acceleration: 0.12, maxSpeed: 120 },
+    'RAV4': { engine: '2.5L 4-Cylinder', hp: 203, accel: '8.5s', acceleration: 0.11, maxSpeed: 115 },
+    'Supra': { engine: '3.0L Turbo', hp: 382, accel: '3.9s', acceleration: 0.35, maxSpeed: 165 },
+  };
+
+  const specs = carSpecs[carName] || carSpecs['Camry'];
+  const { acceleration, maxSpeed } = specs;
+
+  useEffect(() => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    audioContextRef.current = audioContext;
+
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    gain.gain.value = 0;
+
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 100;
+    oscillator.start();
+
+    oscillatorRef.current = oscillator;
+    gainRef.current = gain;
+
+    return () => {
+      oscillator.stop();
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      keysPressed.current[e.key.toLowerCase()] = true;
+      if (['w', 'arrowup', 's', 'arrowdown'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+    };
+
+    const handleKeyUp = (e) => {
+      keysPressed.current[e.key.toLowerCase()] = false;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setThrottle(prev => {
+        const isAccelerating = keysPressed.current['w'] || keysPressed.current['arrowup'];
+        return isAccelerating ? Math.min(prev + 0.05, 1) : Math.max(prev - 0.08, 0);
+      });
+
+      setBrake(prev => {
+        const isBraking = keysPressed.current['s'] || keysPressed.current['arrowdown'];
+        return isBraking ? Math.min(prev + 0.05, 1) : Math.max(prev - 0.08, 0);
+      });
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSpeed(prevSpeed => {
+        let newSpeed = prevSpeed;
+
+        if (throttle > 0) {
+          newSpeed += throttle * acceleration;
+        }
+
+        if (brake > 0) {
+          newSpeed -= brake * 0.4;
+        }
+
+        newSpeed = Math.max(0, Math.min(newSpeed, maxSpeed));
+        newSpeed *= 0.98;
+
+        return newSpeed;
+      });
+
+      setDistance(prev => prev + speed * 0.05);
+      setRoadOffset(prev => (prev + speed * 0.5) % 200);
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [throttle, brake, speed, maxSpeed, acceleration]);
+
+  useEffect(() => {
+    if (gainRef.current && oscillatorRef.current) {
+      const baseFrequency = 150 + (speed / maxSpeed) * 300;
+      oscillatorRef.current.frequency.value = baseFrequency;
+      gainRef.current.gain.value = Math.min(speed / maxSpeed * 0.3, 0.3);
+    }
+  }, [speed, maxSpeed]);
+
+  const getBackgroundGradient = () => {
+    const seasonColors = {
+      spring: { day: 'from-blue-400 to-green-300', night: 'from-slate-900 to-slate-800' },
+      summer: { day: 'from-blue-500 to-yellow-200', night: 'from-slate-900 to-slate-800' },
+      fall: { day: 'from-orange-400 to-red-300', night: 'from-slate-900 to-slate-800' },
+      winter: { day: 'from-cyan-300 to-blue-200', night: 'from-slate-900 to-slate-800' },
+    };
+    return seasonColors[season][isNight ? 'night' : 'day'];
+  };
+
+  return (
+    <div className={`w-full h-screen bg-gradient-to-b ${getBackgroundGradient()} relative overflow-hidden`}>
+      <div className="absolute inset-0 flex items-end justify-center overflow-hidden">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-32 bg-white opacity-60"
+            style={{
+              left: '50%',
+              top: `${(i * 25 - roadOffset) % 200}%`,
+              transform: 'translateX(-50%)',
+            }}
+          />
+        ))}
+        <div className="absolute inset-0 flex">
+          <div className="flex-1 bg-gray-700 opacity-30"></div>
+          <div className="w-1/3"></div>
+          <div className="flex-1 bg-gray-700 opacity-30"></div>
+        </div>
+      </div>
+
+      <div className="absolute bottom-32 left-1/2 -translate-x-1/2 text-9xl drop-shadow-2xl">
+        {carName === 'Supra' ? '🏎️' : carName === 'RAV4' ? '🚙' : '🚗'}
+      </div>
+
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-auto">
+          <button
+            onClick={onBack}
+            className="bg-black/80 border border-red-600 text-red-600 px-4 py-2 rounded-lg hover:bg-black/95 transition-all"
+          >
+            ← Exit Drive
+          </button>
+
+          <div className="flex gap-4">
+            <select
+              value={season}
+              onChange={(e) => setSeason(e.target.value)}
+              className="bg-black/80 border border-red-600 text-red-600 px-3 py-2 rounded-lg"
+            >
+              <option value="spring">Spring 🌸</option>
+              <option value="summer">Summer ☀️</option>
+              <option value="fall">Fall 🍂</option>
+              <option value="winter">Winter ❄️</option>
+            </select>
+
+            <button
+              onClick={() => setIsNight(!isNight)}
+              className="bg-black/80 border border-red-600 text-red-600 px-4 py-2 rounded-lg hover:bg-black/95 transition-all"
+            >
+              {isNight ? '🌙 Night' : '☀️ Day'}
+            </button>
+
+            <button
+              onClick={() => setShowMap(!showMap)}
+              className="bg-black/80 border border-red-600 text-red-600 px-4 py-2 rounded-lg hover:bg-black/95 transition-all"
+            >
+              🗺️ Map
+            </button>
+          </div>
+        </div>
+
+        {showMap && (
+          <div className="absolute top-24 right-6 w-80 h-80 bg-black border-2 border-red-600 rounded-lg overflow-hidden pointer-events-auto z-40">
+            <div className="p-3 bg-red-600">
+              <h3 className="text-white font-bold">Location Map</h3>
+            </div>
+            <div className="p-3 bg-black/90">
+              <input
+                type="text"
+                placeholder="Enter ZIP code..."
+                value={zipCode}
+                onChange={(e) => setZipCode(e.target.value)}
+                className="w-full bg-gray-900 border border-red-600 text-white rounded px-2 py-1 text-sm mb-2"
+              />
+              <button
+                onClick={() => {
+                  setMapLoaded(false);
+                  setTimeout(() => setMapLoaded(true), 100);
+                }}
+                className="w-full bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-sm"
+              >
+                Load Map
+              </button>
+            </div>
+            <div ref={mapRef} className="w-full h-64 bg-gray-800">
+              {mapLoaded && (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-blue-400 to-green-300">
+                  <div className="text-center text-white">
+                    <p className="text-2xl font-bold">📍 {zipCode}</p>
+                    <p className="text-sm mt-2">Bird's Eye View</p>
+                    <p className="text-xs mt-4 px-4">Satellite map for ZIP code {zipCode}</p>
+                    <div className="mt-4 grid grid-cols-3 gap-2 px-4">
+                      <div className="bg-black/50 rounded p-2 text-xs">Roads</div>
+                      <div className="bg-black/50 rounded p-2 text-xs">Parks</div>
+                      <div className="bg-black/50 rounded p-2 text-xs">Area</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {!mapLoaded && (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  Enter ZIP code and click Load Map
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="absolute bottom-6 left-6 right-6 pointer-events-auto">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-black/90 border-2 border-red-600 rounded-lg p-6">
+              <div className="text-center mb-4">
+                <div className="text-5xl font-bold text-red-600">{Math.round(speed)}</div>
+                <div className="text-gray-400 text-sm">MPH</div>
+              </div>
+              <div className="w-full bg-gray-800 rounded-full h-4 overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-green-500 to-red-600 h-full transition-all"
+                  style={{ width: `${(speed / maxSpeed) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-black/90 border-2 border-red-600 rounded-lg p-6">
+              <h3 className="text-red-600 font-bold mb-2">{carName} {new Date().getFullYear()}</h3>
+              <div className="text-sm text-gray-300 space-y-1">
+                <div className="flex justify-between">
+                  <span>Engine:</span>
+                  <span className="text-white">{specs.engine}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Horsepower:</span>
+                  <span className="text-white">{specs.hp} HP</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>0-60:</span>
+                  <span className="text-white">{specs.accel}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Distance:</span>
+                  <span className="text-white">{Math.round(distance)} m</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6 mt-6">
+            <div className="bg-black/90 border-2 border-green-600 rounded-lg p-4">
+              <div className="text-xs text-green-600 mb-2">THROTTLE</div>
+              <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
+                <div
+                  className="bg-green-500 h-full transition-all"
+                  style={{ width: `${throttle * 100}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-black/90 border-2 border-red-600 rounded-lg p-4">
+              <div className="text-xs text-red-600 mb-2">BRAKE</div>
+              <div className="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
+                <div
+                  className="bg-red-500 h-full transition-all"
+                  style={{ width: `${brake * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-black/90 border-2 border-red-600 rounded-lg p-4 mt-6 text-center">
+            <p className="text-gray-300 text-sm">
+              <span className="text-red-600 font-bold">W/↑</span> Accelerate | 
+              <span className="text-red-600 font-bold"> S/↓</span> Brake
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
